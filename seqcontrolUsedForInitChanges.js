@@ -937,197 +937,197 @@
 
 // 		// called from constructor and parses data to find rotated property and makes sure it is recorded in the entries of _frames array
 // 		createjs.SpriteSheet.prototype._parseData = function(data) {
-// 			var i,l,o,a;
-// 			if (data == null) { return; }
+			var i,l,o,a;
+			if (data == null) { return; }
 	 
-// 			this.framerate = data.framerate||0;
+			this.framerate = data.framerate||0;
 	 
-// 			// parse images:
-// 			if (data.images && (l=data.images.length) > 0) {
-// 				a = this._images = [];
-// 				for (i=0; i<l; i++) {
-// 					var img = data.images[i];
-// 					if (typeof img == "string") {
-// 						var src = img;
-// 						img = document.createElement("img");
-// 						img.src = src;
-// 					}
-// 					a.push(img);
-// 					if (!img.getContext && !img.naturalWidth) {
-// 						this._loadCount++;
-// 						this.complete = false;
-// 						(function(o, src) { img.onload = function() { o._handleImageLoad(src); } })(this, src);
-// 						(function(o, src) { img.onerror = function() { o._handleImageError(src); } })(this, src);
-// 					}
-// 				}
-// 			}
+			// parse images:
+			if (data.images && (l=data.images.length) > 0) {
+				a = this._images = [];
+				for (i=0; i<l; i++) {
+					var img = data.images[i];
+					if (typeof img == "string") {
+						var src = img;
+						img = document.createElement("img");
+						img.src = src;
+					}
+					a.push(img);
+					if (!img.getContext && !img.naturalWidth) {
+						this._loadCount++;
+						this.complete = false;
+						(function(o, src) { img.onload = function() { o._handleImageLoad(src); } })(this, src);
+						(function(o, src) { img.onerror = function() { o._handleImageError(src); } })(this, src);
+					}
+				}
+			}
 	 
-// 			// parse frames:
-// 			if (data.frames == null) { // nothing
-// 			} else if (Array.isArray(data.frames)) {
-// 				this._frames = [];
-// 				a = data.frames;
-// 				for (i=0,l=a.length;i<l;i++) {
-// 					var arr = a[i];
-// 					this._frames.push({image:this._images[arr[4]?arr[4]:0], rect:new createjs.Rectangle(arr[0],arr[1],arr[2],arr[3]), regX:arr[5]||0, regY:arr[6]||0, oRegX:arr[8]||arr[5]||0, oRegY:arr[9]||arr[6]||0, rotated:!!arr[7], scale:arr[10] }); // inject the rotated and oReg properties
-// 				}
-// 			} else {
-// 				o = data.frames;
-// 				this._frameWidth = o.width;
-// 				this._frameHeight = o.height;
-// 				this._regX = o.regX||0;
-// 				this._regY = o.regY||0;
-// 				this._oRegX = o.oRegX||o.regX||0; // records the oRegX property as _oRegX
-// 				this._oRegY = o.oRegY||o.regY||0; // records the oRegY property as _oRegY
-// 				this._rotated = !!o.rotated; // records the rotated property
-// 				this._scale = o.scale||1; // records the scale property
-// 				this._spacing = o.spacing||0;
-// 				this._margin = o.margin||0;
-// 				this._numFrames = o.count;
-// 				if (this._loadCount == 0) { this._calculateFrames(); }
-// 			}
+			// parse frames:
+			if (data.frames == null) { // nothing
+			} else if (Array.isArray(data.frames)) {
+				this._frames = [];
+				a = data.frames;
+				for (i=0,l=a.length;i<l;i++) {
+					var arr = a[i];
+					this._frames.push({image:this._images[arr[4]?arr[4]:0], rect:new createjs.Rectangle(arr[0],arr[1],arr[2],arr[3]), regX:arr[5]||0, regY:arr[6]||0, oRegX:arr[8]||arr[5]||0, oRegY:arr[9]||arr[6]||0, rotated:!!arr[7], scale:arr[10] }); // inject the rotated and oReg properties
+				}
+			} else {
+				o = data.frames;
+				this._frameWidth = o.width;
+				this._frameHeight = o.height;
+				this._regX = o.regX||0;
+				this._regY = o.regY||0;
+				this._oRegX = o.oRegX||o.regX||0; // records the oRegX property as _oRegX
+				this._oRegY = o.oRegY||o.regY||0; // records the oRegY property as _oRegY
+				this._rotated = !!o.rotated; // records the rotated property
+				this._scale = o.scale||1; // records the scale property
+				this._spacing = o.spacing||0;
+				this._margin = o.margin||0;
+				this._numFrames = o.count;
+				if (this._loadCount == 0) { this._calculateFrames(); }
+			}
 	 
-// 			// parse animations:
-// 			this._animations = [];
-// 			if ((o=data.animations) != null) {
-// 				this._data = {};
-// 				var name;
-// 				for (name in o) {
-// 					var anim = {name:name};
-// 					var obj = o[name];
-// 					if (typeof obj == "number") { // single frame
-// 						a = anim.frames = [obj];
-// 					} else if (Array.isArray(obj)) { // simple
-// 						if (obj.length == 1) { anim.frames = [obj[0]]; }
-// 						else {
-// 							anim.speed = obj[3];
-// 							anim.next = obj[2];
-// 							a = anim.frames = [];
-// 							for (i=obj[0];i<=obj[1];i++) {
-// 								a.push(i);
-// 							}
-// 						}
-// 					} else { // complex
-// 						anim.speed = obj.speed;
-// 						anim.next = obj.next;
-// 						var frames = obj.frames;
-// 						a = anim.frames = (typeof frames == "number") ? [frames] : frames.slice(0);
-// 					}
-// 					if (anim.next === true || anim.next === undefined) { anim.next = name; } // loop
-// 					if (anim.next === false || (a.length < 2 && anim.next == name)) { anim.next = null; } // stop
-// 					if (!anim.speed) { anim.speed = 1; }
-// 					this._animations.push(name);
-// 					this._data[name] = anim;
-// 				}
-// 			}
+			// parse animations:
+			this._animations = [];
+			if ((o=data.animations) != null) {
+				this._data = {};
+				var name;
+				for (name in o) {
+					var anim = {name:name};
+					var obj = o[name];
+					if (typeof obj == "number") { // single frame
+						a = anim.frames = [obj];
+					} else if (Array.isArray(obj)) { // simple
+						if (obj.length == 1) { anim.frames = [obj[0]]; }
+						else {
+							anim.speed = obj[3];
+							anim.next = obj[2];
+							a = anim.frames = [];
+							for (i=obj[0];i<=obj[1];i++) {
+								a.push(i);
+							}
+						}
+					} else { // complex
+						anim.speed = obj.speed;
+						anim.next = obj.next;
+						var frames = obj.frames;
+						a = anim.frames = (typeof frames == "number") ? [frames] : frames.slice(0);
+					}
+					if (anim.next === true || anim.next === undefined) { anim.next = name; } // loop
+					if (anim.next === false || (a.length < 2 && anim.next == name)) { anim.next = null; } // stop
+					if (!anim.speed) { anim.speed = 1; }
+					this._animations.push(name);
+					this._data[name] = anim;
+				}
+			}
 // 		};
 
 // 		// called from parseData and is used to set up frames if a single frame data object is given instead of array above
 // 		createjs.SpriteSheet.prototype._calculateFrames = function() {
-// 			if (this._frames || this._frameWidth == 0) { return; }
+			if (this._frames || this._frameWidth == 0) { return; }
 
-// 			this._frames = [];
+			this._frames = [];
 
-// 			var maxFrames = this._numFrames || 100000; // if we go over this, something is wrong.
-// 			var frameCount = 0, frameWidth = this._frameWidth, frameHeight = this._frameHeight;
-// 			var spacing = this._spacing, margin = this._margin;
+			var maxFrames = this._numFrames || 100000; // if we go over this, something is wrong.
+			var frameCount = 0, frameWidth = this._frameWidth, frameHeight = this._frameHeight;
+			var spacing = this._spacing, margin = this._margin;
 			
-// 			imgLoop:
-// 			for (var i=0, imgs=this._images; i<imgs.length; i++) {
-// 				var img = imgs[i], imgW = (img.width||img.naturalWidth), imgH = (img.height||img.naturalHeight);
+			imgLoop:
+			for (var i=0, imgs=this._images; i<imgs.length; i++) {
+				var img = imgs[i], imgW = (img.width||img.naturalWidth), imgH = (img.height||img.naturalHeight);
 
-// 				var y = margin;
-// 				while (y <= imgH-margin-frameHeight) {
-// 					var x = margin;
-// 					while (x <= imgW-margin-frameWidth) {
-// 						if (frameCount >= maxFrames) { break imgLoop; }
-// 						frameCount++;
-// 						// records the rotated and oReg properties
-// 						this._frames.push({
-// 								image: img,
-// 								rect: new createjs.Rectangle(x, y, frameWidth, frameHeight),
-// 								regX: this._regX,
-// 								regY: this._regY,
-// 								oRegX: this._oRegX, // oRegX and oRegY assigned in _parseData 
-// 								oRegY: this._oRegY,
-// 								rotated: this._rotated,
-// 								scale: this._scale
-// 							});
-// 						x += frameWidth+spacing;
-// 					}
-// 					y += frameHeight+spacing;
-// 				}
-// 			}
-// 			this._numFrames = frameCount;
+				var y = margin;
+				while (y <= imgH-margin-frameHeight) {
+					var x = margin;
+					while (x <= imgW-margin-frameWidth) {
+						if (frameCount >= maxFrames) { break imgLoop; }
+						frameCount++;
+						// records the rotated and oReg properties
+						this._frames.push({
+								image: img,
+								rect: new createjs.Rectangle(x, y, frameWidth, frameHeight),
+								regX: this._regX,
+								regY: this._regY,
+								oRegX: this._oRegX, // oRegX and oRegY assigned in _parseData 
+								oRegY: this._oRegY,
+								rotated: this._rotated,
+								scale: this._scale
+							});
+						x += frameWidth+spacing;
+					}
+					y += frameHeight+spacing;
+				}
+			}
+			this._numFrames = frameCount;
 // 		};
 	
 // 		// called from _startBuild and generates dataFrames which is passed into _parseData on spriteSheet instantiation
 // 		createjs.SpriteSheetBuilder.prototype._fillRow = function(frames, y, img, dataFrames, pad) {
-// 			var w = this.maxWidth;
-// 			var maxH = this.maxHeight;
-// 			y += pad;
-// 			var h = maxH-y;
-// 			var x = pad;
-// 			var height = 0;
-// 			for (var i=frames.length-1; i>=0; i--) {
-// 				var frame = frames[i];
-// 				var sc = this._scale*frame.scale;
-// 				var rect = frame.sourceRect;
-// 				var source = frame.source;
-// 				var rx = Math.floor(sc*rect.x-pad);
-// 				var ry = Math.floor(sc*rect.y-pad);
-// 				var _rx = Math.floor(rect.x-pad);
-// 				var _ry = Math.floor(rect.y-pad);
-// 				var rh = Math.ceil(sc*rect.height+pad*2);
-// 				var rw = Math.ceil(sc*rect.width+pad*2);
-// 				if (rw > w) { throw createjs.SpriteSheetBuilder.ERR_DIMENSIONS; }
-// 				if (rh > h || x+rw > w) { continue; }
-// 				frame.img = img;
-// 				frame.rect = new createjs.Rectangle(x,y,rw,rh);
-// 				height = height || rh;
-// 				frames.splice(i,1);
-// 				// added indices 8 and 9 to support _regX and _regY assigned later
-// 				// added index 7 as null because we use it for rotated property
-// 				dataFrames[frame.index] = [x,y,rw,rh,img,Math.round(-rx+sc*source.regX-pad),Math.round(-ry+sc*source.regY-pad),null,Math.round(-_rx+source.regX-pad),Math.round(-_ry+source.regY-pad),sc];
-// 				x += rw;
-// 			}
-// 			return {w:x, h:height};
+			var w = this.maxWidth;
+			var maxH = this.maxHeight;
+			y += pad;
+			var h = maxH-y;
+			var x = pad;
+			var height = 0;
+			for (var i=frames.length-1; i>=0; i--) {
+				var frame = frames[i];
+				var sc = this._scale*frame.scale;
+				var rect = frame.sourceRect;
+				var source = frame.source;
+				var rx = Math.floor(sc*rect.x-pad);
+				var ry = Math.floor(sc*rect.y-pad);
+				var _rx = Math.floor(rect.x-pad);
+				var _ry = Math.floor(rect.y-pad);
+				var rh = Math.ceil(sc*rect.height+pad*2);
+				var rw = Math.ceil(sc*rect.width+pad*2);
+				if (rw > w) { throw createjs.SpriteSheetBuilder.ERR_DIMENSIONS; }
+				if (rh > h || x+rw > w) { continue; }
+				frame.img = img;
+				frame.rect = new createjs.Rectangle(x,y,rw,rh);
+				height = height || rh;
+				frames.splice(i,1);
+				// added indices 8 and 9 to support _regX and _regY assigned later
+				// added index 7 as null because we use it for rotated property
+				dataFrames[frame.index] = [x,y,rw,rh,img,Math.round(-rx+sc*source.regX-pad),Math.round(-ry+sc*source.regY-pad),null,Math.round(-_rx+source.regX-pad),Math.round(-_ry+source.regY-pad),sc];
+				x += rw;
+			}
+			return {w:x, h:height};
 // 		};			
 
 // 		// adding parameter preferSourceRect to block frameBounds from overriding a supplied sourceRect
 // 		createjs.SpriteSheetBuilder.prototype.addMovieClip = function(source, sourceRect, scale, setupFunction, setupData, labelFunction, preferSourceRect) {
-// 			if (this._data) { throw createjs.SpriteSheetBuilder.ERR_RUNNING; }
-// 			var rects = source.frameBounds;
-// 			var rect = sourceRect||source.bounds||source.nominalBounds;
-// 			if (!rect&&source.getBounds) { rect = source.getBounds(); }
-// 			if (!rect && !rects) { return; }
+			if (this._data) { throw createjs.SpriteSheetBuilder.ERR_RUNNING; }
+			var rects = source.frameBounds;
+			var rect = sourceRect||source.bounds||source.nominalBounds;
+			if (!rect&&source.getBounds) { rect = source.getBounds(); }
+			if (!rect && !rects) { return; }
 	 
-// 			var i, l, baseFrameIndex = this._frames.length;
-// 			var duration = source.timeline.duration;
-// 			for (i=0; i<duration; i++) {
-// 				var r = !preferSourceRect || !sourceRect ? (rects&&rects[i]) ? rects[i] : rect : sourceRect;
-// 				this.addFrame(source, r, scale, this._setupMovieClipFrame, {i:i, f:setupFunction, d:setupData});
-// 			}
-// 			var labels = source.timeline._labels;
-// 			var lbls = [];
-// 			for (var n in labels) {
-// 				lbls.push({index:labels[n], label:n});
-// 			}
-// 			if (lbls.length) {
-// 				lbls.sort(function(a,b){ return a.index-b.index; });
-// 				for (i=0,l=lbls.length; i<l; i++) {
-// 					var label = lbls[i].label;
-// 					var start = baseFrameIndex+lbls[i].index;
-// 					var end = baseFrameIndex+((i == l-1) ? duration : lbls[i+1].index);
-// 					var frames = [];
-// 					for (var j=start; j<end; j++) { frames.push(j); }
-// 					if (labelFunction) {
-// 						label = labelFunction(label, source, start, end);
-// 						if (!label) { continue; }
-// 					}
-// 					this.addAnimation(label, frames, true); // for now, this loops all animations.
-// 				}
-// 			}
+			var i, l, baseFrameIndex = this._frames.length;
+			var duration = source.timeline.duration;
+			for (i=0; i<duration; i++) {
+				var r = !preferSourceRect || !sourceRect ? (rects&&rects[i]) ? rects[i] : rect : sourceRect;
+				this.addFrame(source, r, scale, this._setupMovieClipFrame, {i:i, f:setupFunction, d:setupData});
+			}
+			var labels = source.timeline._labels;
+			var lbls = [];
+			for (var n in labels) {
+				lbls.push({index:labels[n], label:n});
+			}
+			if (lbls.length) {
+				lbls.sort(function(a,b){ return a.index-b.index; });
+				for (i=0,l=lbls.length; i<l; i++) {
+					var label = lbls[i].label;
+					var start = baseFrameIndex+lbls[i].index;
+					var end = baseFrameIndex+((i == l-1) ? duration : lbls[i+1].index);
+					var frames = [];
+					for (var j=start; j<end; j++) { frames.push(j); }
+					if (labelFunction) {
+						label = labelFunction(label, source, start, end);
+						if (!label) { continue; }
+					}
+					this.addAnimation(label, frames, true); // for now, this loops all animations.
+				}
+			}
 // 		};
 
 // 		// BEGIN modifications to StageGL to support webgl2
