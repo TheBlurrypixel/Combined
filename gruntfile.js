@@ -24,6 +24,20 @@ module.exports = function (grunt) {
 				}
 			}
 		},
+		terser: {
+			options: {
+				format: {
+					preamble: grunt.file.read('LICENSE'),
+					comments: false
+				}
+			},
+			build: {
+				files: {
+//					'builds/createjs-<%= grunt.template.today("yyyy.mm.dd") %>.min.js': getCombinedSource(true)
+					'builds/<%= pkg.version %>/createjs.min.js': getCombinedSource(true)
+				}
+			}
+		},
 		concat: {
 			options: {
 				separator: '',
@@ -59,7 +73,7 @@ module.exports = function (grunt) {
 			},
 			build: {
 				files: {
-					'builds/createjs-<%= grunt.template.today("yyyy.mm.dd") %>.combined.js': getCombinedSource(true)
+					'builds/<%= pkg.version %>/createjs.js': getCombinedSource(true)
 				}
 			}
 		},
@@ -230,6 +244,7 @@ module.exports = function (grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-terser');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-clean');
@@ -250,7 +265,8 @@ module.exports = function (grunt) {
 	grunt.registerTask('build', 'Build every project using the latest version in each package.json.', ['start', 'copyCommon', 'hub:build', 'core', 'hub:reset', 'end']);
 	grunt.registerTask('next', 'Build every project using a NEXT version.', ['start', 'copyCommon', 'hub:next', 'core', 'hub:reset', 'end']);
 	grunt.registerTask('core', 'Main task that only runs global tasks. (The child projects are not built)', ['js', 'multicopy:assets', 'clean:examples', 'copy']);
-	grunt.registerTask('js', 'Only minifies and combines the JavaScript files.', ['uglify', 'concat']);
+//	grunt.registerTask('js', 'Only minifies and combines the JavaScript files.', ['uglify', 'concat']);
+	grunt.registerTask('js', 'Only minifies and combines the JavaScript files.', ['terser', 'concat']);
 
 	grunt.registerTask('cdn', 'Build a new CDN index page and copy all required files to the cdn/build/ folder.', ['sass:cdn', 'inline:cdn', 'copyCDNSource', 'copy:cdn']);
 	grunt.registerTask('design', 'Build a new CDN index page.', ['sass:cdn', 'inline:cdn', 'copy:cdn']);
@@ -299,6 +315,18 @@ module.exports = function (grunt) {
 		var src = path.join(parent, 'lib', '*' + '-' + version + '*');
 		return grunt.file.expand(src);
 	}
+
+	function getVersion () {
+		var file = './package.json';
+		if (!grunt.file.exists(file)) {
+			return;
+		}
+		var json = grunt.file.readJSON(file);
+		var version = json.version;
+
+		return version;
+	}
+
 
 	grunt.registerMultiTask('multicopy', function () {
 		this.data.files.forEach(function (item, index, array) {

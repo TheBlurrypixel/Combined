@@ -1,0 +1,29 @@
+1. Create folder for all the repos. Call it something like 'cjs' and:
+
+   npm i grunt-cli -g
+
+2. git clone the EaselJS, PreloadJS, SoundJS, and TweenJS repos
+
+3. git clone the CreateJS repo, this will put in the docs and demo info
+
+4. Go into the Combined folder
+
+5. npm i
+
+6. Go into the build folder of each of EaselJS, PreloadJS, SoundsJS, and TweenJS
+
+7. For each folder
+
+    npm i
+
+8. go into the Combined folder and run
+
+    grunt build --force
+
+    force is used because there is a grunt-sass plugin that cannot run because sass and ruby are not installed but we don't need them
+
+9. the builds should show up in the Combined/builds folder
+
+
+NOTES: copy of duplicate files overwrite Easel -> Preload -> Sound -> Tween 
+i.e. Easel overwrites all

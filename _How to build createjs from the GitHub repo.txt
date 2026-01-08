@@ -1,0 +1,38 @@
+1. Create folder for all the repos. Call it something like 'cjs' and:
+
+   npm i grunt-cli -g
+
+2. git clone the EaselJS, PreloadJS, SoundJS, and TweenJS repos
+
+3. git clone the CreateJS repo, this will put in the docs and demo info
+
+4. go into EaselJS/build and open the package.json
+
+5. copy the lines from
+		"grunt": "~0.4.5",
+	to
+		"grunt-contrib-clean":"^0.4.0",
+
+6. go into SoundsJS/build and paste over the corresponding lines
+   and delete the grunt-mxmlc line // this module corresponds to Flex which we don't need
+
+   In the Gruntfile.js delete the line:
+      grunt.loadNpmTasks('grunt-mxmlc');
+
+7. Go into the Combined folder
+
+8. npm i
+
+9. Go into the build folder of each of EaselJS, PreloadJS, SoundsJS, and TweenJS
+
+10. For each folder
+
+    npm i
+
+11. go into the Combined folder and run
+
+    grunt build --force
+
+    force is used because there is a grunt-sass plugin that cannot run because sass and ruby are not installed but we don't need them
+
+12. the builds should show up in the Combined/builds folder
