@@ -10534,9 +10534,9 @@ createjs.deprecate = function(fallbackMethod, name) {
 		if (item._storeID !== undefined) {
 			// this is a texture itself
 			if (item === this._textureDictionary[item._storeID]) {
-				item._storeID = undefined;
-				return this._killTextureObject(item); // mod to return boolean
-//				return;
+				var res = this._killTextureObject(item); // mod to return boolean
+				item._storeID = undefined; // must come after because it is texture already
+				return res;
 			}
 
 			// this is an image or canvas
@@ -10774,7 +10774,8 @@ createjs.deprecate = function(fallbackMethod, name) {
 		renderTexture._frameBuffer = frameBuffer;
 
 		// these keep track of themselves simply to reduce complexity of some lookup code
-		renderTexture._storeID = this._textureDictionary.length;
+		// renderTexture._storeID = this._textureDictionary.length;
+		renderTexture._storeID = this._getTexDictOpenIndex(); // using an open index instead to keep the _textureDictionary length low
 		this._textureDictionary[renderTexture._storeID] = renderTexture;
 
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -10889,6 +10890,15 @@ createjs.deprecate = function(fallbackMethod, name) {
 	// Docced in subclass
 	p.toString = function () {
 		return "[StageGL (name="+  this.name +")]";
+	};
+
+	/**
+	 * Get the size of the _textureDictionary array which is not undefined or null
+	 * @method getTexDictSize
+	 * @return {Number} The number of valid values in the array
+	 */
+	p.getTexDictSize = function () {
+		return this._textureDictionary.filter(i=>i!=undefined).length;
 	};
 
 // private methods:
@@ -11260,6 +11270,18 @@ createjs.deprecate = function(fallbackMethod, name) {
 	};
 
 	/**
+	 * Get the next open slot to assign a texture in the _textureDictionary array
+	 * @method _getTexDictOpenIndex
+	 * @return {Number} The lowest index of undefined value or the length of the array
+	 * @protected
+	 */
+	p._getTexDictOpenIndex = function () {
+		var index = this._textureDictionary.findIndex(i=>i==undefined);
+		if(index < 0) index = this._textureDictionary.length;
+		return index;
+	};
+
+	/**
 	 * Load a specific texture, accounting for potential delay, as it might not be preloaded.
 	 * @method _loadTextureImage
 	 * @param {WebGLRenderingContext} gl
@@ -11284,7 +11306,8 @@ createjs.deprecate = function(fallbackMethod, name) {
 		// create the texture lookup and texture
 		var storeID = this._textureIDs[srcPath];
 		if (storeID === undefined) {
-			this._textureIDs[srcPath] = storeID = this._textureDictionary.length;
+			// this._textureIDs[srcPath] = storeID = this._textureDictionary.length;
+			this._textureIDs[srcPath] = storeID = this._getTexDictOpenIndex();
 			image._storeID = storeID;
 			image._invalid = true;
 			texture = this._getSafeTexture();
@@ -18112,7 +18135,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:44 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:28 GMT"; // injected by build process
 
 })();
 
@@ -18143,7 +18166,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type {String}
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:43 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:27 GMT"; // injected by build process
 
 })();
 
@@ -25456,7 +25479,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:43 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:27 GMT"; // injected by build process
 
 })();
 
@@ -33058,6 +33081,6 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:43 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:27 GMT"; // injected by build process
 
 })();

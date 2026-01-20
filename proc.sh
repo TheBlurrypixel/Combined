@@ -2,7 +2,7 @@ git status
 echo "git add ."
 git add .
 echo git commit
-git commit -m "Fix proc"
+git commit -m "Add methods for length of textureDict"
 echo "git push origin master"
 git push origin master
 
@@ -13,7 +13,7 @@ git status
 echo "git add ."
 git add .
 echo git commit
-git commit -m "Fix proc"
+git commit -m "Add methods for length of textureDict"
 echo "git push origin master"
 git push origin master
 
@@ -24,7 +24,7 @@ git status
 echo "git add ."
 git add .
 echo git commit
-git commit -m "Fix proc"
+git commit -m "Add methods for length of textureDict"
 echo "git push origin master"
 git push origin master
 
@@ -35,7 +35,7 @@ git status
 echo "git add ."
 git add .
 echo git commit
-git commit -m "Fix proc"
+git commit -m "Add methods for length of textureDict"
 echo "git push origin master"
 git push origin master
 
@@ -46,6 +46,6 @@ git status
 echo "git add ."
 git add .
 echo git commit
-git commit -m "Fix proc"
+git commit -m "Add methods for length of textureDict"
 echo "git push origin master"
 git push origin master
