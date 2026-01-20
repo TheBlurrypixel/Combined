@@ -10512,10 +10512,11 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @method releaseTexture
 	 * @param {DisplayObject | WebGLTexture | Image | Canvas} item An object that used the texture to be discarded.
 	 * @param {Boolean} [safe=false] Should the release attempt to be "safe" and only delete this usage.
+	 * @returns {Boolean} false if no texture found, no item found, no image found
 	 */
 	p.releaseTexture = function (item, safe) {
 		var i, l;
-		if (!item) { return; }
+		if (!item) { return false; }
 
 		// this is a container object
 		if (item.children) {
@@ -10533,9 +10534,9 @@ createjs.deprecate = function(fallbackMethod, name) {
 		if (item._storeID !== undefined) {
 			// this is a texture itself
 			if (item === this._textureDictionary[item._storeID]) {
-				this._killTextureObject(item);
 				item._storeID = undefined;
-				return;
+				return this._killTextureObject(item); // mod to return boolean
+//				return;
 			}
 
 			// this is an image or canvas
@@ -10549,7 +10550,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 			for (i = 0, l = item.spriteSheet._images.length; i < l; i++) {
 				this.releaseTexture(item.spriteSheet._images[i], safe);
 			}
-			return;
+			return true;
 		}
 
 		// did we find anything
@@ -10557,7 +10558,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 			if (this.vocalDebug) {
 				console.log("No associated texture found on release");
 			}
-			return;
+			return false; // mod to return boolean
 		}
 
 		// none of the above happens if it is a canvas element, test for it to find a storeID
@@ -10582,7 +10583,9 @@ createjs.deprecate = function(fallbackMethod, name) {
 					foundImage.removeAttribute('data-_storeid');
 				}
 
-				if (data.length === 0) { this._killTextureObject(texture); }
+				if (data.length === 0) { return this._killTextureObject(texture); } // mod to return boolean
+
+				return true; // mod to return boolean
 			}
 		} else {
 			// removing storeid
@@ -10592,8 +10595,10 @@ createjs.deprecate = function(fallbackMethod, name) {
 				foundImage.removeAttribute('data-_storeid');
 			}
 
-			this._killTextureObject(texture); // possible might be undefined but _killTextureObject() can handle it
+			return this._killTextureObject(texture); // possible might be undefined but _killTextureObject() can handle it
 		}
+
+		return false; // mod to return boolean
 	};
 
 	/**
@@ -11423,9 +11428,10 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @method _killTextureObject
 	 * @param {WebGLTexture} texture The texture to be cleaned out
 	 * @protected
+	 * @returns {Boolean} false if no texture otherwise always true
 	 */
 	p._killTextureObject = function (texture) {
-		if (!texture) { return; }
+		if (!texture) { return false; }
 		var gl = this._webGLContext;
 
 		// remove linkage
@@ -11462,6 +11468,8 @@ createjs.deprecate = function(fallbackMethod, name) {
 			/* suppress delete errors because it's already gone or didn't need deleting probably */
 			if (this.vocalDebug) { console.log(e); }
 		}
+
+		return true;
 	};
 
 	/**
@@ -18104,7 +18112,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:29 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:44 GMT"; // injected by build process
 
 })();
 
@@ -18135,7 +18143,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type {String}
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:28 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:43 GMT"; // injected by build process
 
 })();
 
@@ -25448,7 +25456,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:28 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:43 GMT"; // injected by build process
 
 })();
 
@@ -33050,6 +33058,6 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:28 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 06:28:43 GMT"; // injected by build process
 
 })();
