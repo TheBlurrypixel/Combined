@@ -1,11 +1,8 @@
-commitStr="Fix dataset typo"
-echoCommitStr="git commit -m "
-gitCommitStr="${echoCommitStr}${commitStr}"
 git status
 echo "git add ."
 git add .
-echo gitCommitStr
-git commit -m commitStr
+echo git commit
+git commit -m "Fix proc"
 echo "git push origin master"
 git push origin master
 
@@ -15,8 +12,8 @@ cd EaselJS
 git status
 echo "git add ."
 git add .
-echo gitCommitStr
-git commit -m commitStr
+echo git commit
+git commit -m "Fix proc"
 echo "git push origin master"
 git push origin master
 
@@ -26,8 +23,8 @@ cd PreloadJS
 git status
 echo "git add ."
 git add .
-echo gitCommitStr
-git commit -m commitStr
+echo git commit
+git commit -m "Fix proc"
 echo "git push origin master"
 git push origin master
 
@@ -37,8 +34,8 @@ cd SoundJS
 git status
 echo "git add ."
 git add .
-echo gitCommitStr
-git commit -m commitStr
+echo git commit
+git commit -m "Fix proc"
 echo "git push origin master"
 git push origin master
 
@@ -48,7 +45,7 @@ cd TweenJS
 git status
 echo "git add ."
 git add .
-echo gitCommitStr
-git commit -m commitStr
+echo git commit
+git commit -m "Fix proc"
 echo "git push origin master"
 git push origin master
