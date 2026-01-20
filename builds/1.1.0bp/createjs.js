@@ -10578,7 +10578,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 				// removing storeid
 				// delete doesn't always work in older versons of Safari so also using removeAttribute
 				if(isCanvas) {
-					delete foundImage.data._storeid;
+					delete foundImage.dataset._storeid;
 					foundImage.removeAttribute('data-_storeid');
 				}
 
@@ -10588,7 +10588,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 			// removing storeid
 			// delete doesn't always work in older versons of Safari so also using removeAttribute
 			if(isCanvas) {
-				delete foundImage.data._storeid;
+				delete foundImage.dataset._storeid;
 				foundImage.removeAttribute('data-_storeid');
 			}
 
@@ -18104,7 +18104,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:26 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:29 GMT"; // injected by build process
 
 })();
 
@@ -18135,7 +18135,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type {String}
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:19 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:28 GMT"; // injected by build process
 
 })();
 
@@ -25448,7 +25448,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:20 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:28 GMT"; // injected by build process
 
 })();
 
@@ -33050,6 +33050,6 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:20 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 05:52:28 GMT"; // injected by build process
 
 })();
