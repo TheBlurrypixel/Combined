@@ -33,42 +33,47 @@ this.createjs = this.createjs||{};
 // definitions.js
 //##############################################################################
 
-/**
- * @class Debug Color Constants
- */
+(function() {
+	"use strict";
 
-/**
- * Unique constants used for indexing object properties
-*/
-var SYMBOLS = {
-	PROTECTED_DRAW: Symbol('protectedDraw'),
-	PROTECTED_CONTAINER_DRAW: Symbol('protectedContainerDraw'),
-	SPRITE: Symbol('sprite'),
-	BITMAPSWAP: Symbol('bitmapswap'),
-	CHILDREN: Symbol('children'),
-	WEBGLRENDERSTYLE: Symbol('_webGLRenderStyle'),
-	SPRITESHEET: Symbol('spriteSheet'),
-	CURRENTFRAME: Symbol('currentFrame'),
-	TICKENABLED: Symbol('tickEnabled'),
-	TICKCHILDREN: Symbol('tickChildren'),
-	SPRITE_TICK: Symbol('spriteTick'),
-	ADDCHILDAT: Symbol('addChildAt'),
-	COMPONENT_DRAW: Symbol('componentDraw'),
-	DETACH_FUNC: Symbol('detachFunc'),
-	GET_FRAME: Symbol('getFrame'),
-	AUDIO_UNLOCK: Symbol('audioUnlock'),
-	IS_FILE_XHR: Symbol('isFileXHRSupported'),
-	ALERT: Symbol('alert'),
-	KNOCKOFF: Symbol('knockoff'),
-	UPDATETIMELINE: Symbol('updateTimeline'),
-	SPRITE_COLOR: Symbol('spriteColor'),
-	CACHE_COLOR: Symbol('cacheColor'),
-	WARNING_COLORS: Symbol('warningColors')
-};
-createjs.spriteColor = createjs[SYMBOLS.SPRITE_COLOR] = "#FF00FF";
-createjs.cacheColor = createjs[SYMBOLS.CACHE_COLOR] = "#8800FF";
-createjs.warningColors = createjs[SYMBOLS.WARNING_COLORS] = 0;
-createjs.SYMBOLS = SYMBOLS;
+	/**
+	 * @class Debug Color Constants
+	 */
+
+	/**
+	 * Unique constants used for indexing object properties
+	*/
+	var SYMBOLS = {
+		PROTECTED_DRAW: Symbol('protectedDraw'),
+		PROTECTED_CONTAINER_DRAW: Symbol('protectedContainerDraw'),
+		SPRITE: Symbol('sprite'),
+		BITMAPSWAP: Symbol('bitmapswap'),
+		CHILDREN: Symbol('children'),
+		WEBGLRENDERSTYLE: Symbol('_webGLRenderStyle'),
+		SPRITESHEET: Symbol('spriteSheet'),
+		CURRENTFRAME: Symbol('currentFrame'),
+		TICKENABLED: Symbol('tickEnabled'),
+		TICKCHILDREN: Symbol('tickChildren'),
+		SPRITE_TICK: Symbol('spriteTick'),
+		ADDCHILDAT: Symbol('addChildAt'),
+		COMPONENT_DRAW: Symbol('componentDraw'),
+		DETACH_FUNC: Symbol('detachFunc'),
+		GET_FRAME: Symbol('getFrame'),
+		AUDIO_UNLOCK: Symbol('audioUnlock'),
+		IS_FILE_XHR: Symbol('isFileXHRSupported'),
+		ALERT: Symbol('alert'),
+		KNOCKOFF: Symbol('knockoff'),
+		UPDATETIMELINE: Symbol('updateTimeline'),
+		SPRITE_COLOR: Symbol('spriteColor'),
+		CACHE_COLOR: Symbol('cacheColor'),
+		WARNING_COLORS: Symbol('warningColors')
+	};
+
+	createjs.spriteColor = createjs[SYMBOLS.SPRITE_COLOR] = "#FF00FF";
+	createjs.cacheColor = createjs[SYMBOLS.CACHE_COLOR] = "#8800FF";
+	createjs.warningColors = createjs[SYMBOLS.WARNING_COLORS] = 0;
+	createjs.SYMBOLS = SYMBOLS;
+}());
 
 //##############################################################################
 // extend.js
@@ -10555,16 +10560,39 @@ createjs.deprecate = function(fallbackMethod, name) {
 			return;
 		}
 
+		// none of the above happens if it is a canvas element, test for it to find a storeID
+		// we retrieve a storeID from the dataset attribute because DOM element isn't exactly a run of the mill JS object
+		// we need to store it with lowercase "_storeid" because uppercase "_storeID" will add hyphenations as _store-i-d
+		var isCanvas = foundImage instanceof HTMLCanvasElement;
+		var storeID = isCanvas ? foundImage.dataset._storeid : foundImage._storeID;
+
 		// remove it
-		var texture = this._textureDictionary[foundImage._storeID];
+		var texture = this._textureDictionary[storeID]; // mod to use storeID variable from above
 		if (safe) {
-			var data = texture._imageData;
-			var index = data.indexOf(foundImage);
-			if (index >= 0) { data.splice(index, 1); }
-			foundImage._storeID = undefined;
-			if (data.length === 0) { this._killTextureObject(texture); }
+			if(texture) { // texture might be null if no storeID found
+				var data = texture._imageData;
+				var index = data.indexOf(foundImage);
+				if (index >= 0) { data.splice(index, 1); }
+				foundImage._storeID = undefined;
+
+				// removing storeid
+				// delete doesn't always work in older versons of Safari so also using removeAttribute
+				if(isCanvas) {
+					delete foundImage.data._storeid;
+					foundImage.removeAttribute('data-_storeid');
+				}
+
+				if (data.length === 0) { this._killTextureObject(texture); }
+			}
 		} else {
-			this._killTextureObject(texture);
+			// removing storeid
+			// delete doesn't always work in older versons of Safari so also using removeAttribute
+			if(isCanvas) {
+				delete foundImage.data._storeid;
+				foundImage.removeAttribute('data-_storeid');
+			}
+
+			this._killTextureObject(texture); // possible might be undefined but _killTextureObject() can handle it
 		}
 	};
 
@@ -11260,6 +11288,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 			image._storeID = storeID;
 			texture = this._textureDictionary[storeID];
 		}
+		if(image._isCanvas) image.dataset._storeid = storeID; // mod DOM Element will not store the storeID unless it is in a dataset
 
 		// allow the texture to track its references for cleanup, if it's not an error ref
 		if (texture._storeID !== -1) {
@@ -18075,7 +18104,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Thu, 15 Jan 2026 02:01:15 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:26 GMT"; // injected by build process
 
 })();
 
@@ -18106,7 +18135,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type {String}
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Thu, 15 Jan 2026 02:01:15 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:19 GMT"; // injected by build process
 
 })();
 
@@ -25419,7 +25448,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Thu, 15 Jan 2026 02:01:15 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:20 GMT"; // injected by build process
 
 })();
 
@@ -33021,6 +33050,6 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Thu, 15 Jan 2026 02:01:15 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Tue, 20 Jan 2026 03:38:20 GMT"; // injected by build process
 
 })();
