@@ -9118,8 +9118,8 @@ createjs.deprecate = function(fallbackMethod, name) {
 	function StageGL(canvas, options) {
 		this.Stage_constructor(canvas);
 
-		// adding webgl2 options
-		var transparent, antialias, preserveBuffer, autoPurge, directDraw, batchSize, webgl2;
+		// adding webgl2 syncStoreIDPool options
+		var transparent, antialias, preserveBuffer, autoPurge, directDraw, batchSize, webgl2, syncStoreIDPool;
 		if (options !== undefined) {
 			if (typeof options !== "object"){ throw("Invalid options object"); }
 			transparent = options.transparent;
@@ -9129,6 +9129,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 			directDraw = options.directDraw;
 			batchSize = options.batchSize;
 			webgl2 = options.webgl2;
+			syncStoreIDPool = options.syncStoreIDPool;
 		}
 
 // public properties:
@@ -9198,9 +9199,21 @@ createjs.deprecate = function(fallbackMethod, name) {
 		 * @property _directDraw
 		 * @protected
 		 * @type {Boolean}
-		 * @default false
+		 * @default true
 		 */
 		this._directDraw = directDraw === undefined ? true : (!!directDraw);
+
+		/**
+		 * mod
+		 * 
+		 * Stage will synch the storeIDPool with the _textureDictionary during purgeTextures
+		 * It is possible to disable this if synching interferes with frequent purges
+		 * @property _syncStoreIDPool
+		 * @protected
+		 * @type {Boolean}
+		 * @default true
+		 */
+		this._syncStoreIDPool = syncStoreIDPool === undefined ? true : (!!syncStoreIDPool);
 
 		/**
 		 * The width in px of the drawing surface saved in memory.
@@ -9370,6 +9383,14 @@ createjs.deprecate = function(fallbackMethod, name) {
 		 * @type {Array}
 		 */
 		this._textureDictionary = [];
+
+		/**
+		 * An array of storeIDs that are now made available for quick lookup which should be faster than looping through the array to find one
+		 * @property _storeIDPool
+		 * @protected
+		 * @type {Array}
+		 */
+		this._storeIDPool = [];
 
 		/**
 		 * A string based lookup hash of which index a texture is stored at in the dictionary. The lookup string is
@@ -10512,7 +10533,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @method releaseTexture
 	 * @param {DisplayObject | WebGLTexture | Image | Canvas} item An object that used the texture to be discarded.
 	 * @param {Boolean} [safe=false] Should the release attempt to be "safe" and only delete this usage.
-	 * @returns {Boolean} false if no texture found, no item found, no image found
+	 * @return {Boolean} false if no texture found, no item found, no image found
 	 */
 	p.releaseTexture = function (item, safe) {
 		var i, l;
@@ -10631,6 +10652,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 
 			if (!data.length) { this._killTextureObject(texture); }
 		}
+		if(this._syncStoreIDPool) this._cleanupStoreIDPool(); // will make sure the storeID pool matches _textureDicitionary
 	};
 
 	/**
@@ -10775,7 +10797,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 
 		// these keep track of themselves simply to reduce complexity of some lookup code
 		// renderTexture._storeID = this._textureDictionary.length;
-		renderTexture._storeID = this._getTexDictOpenIndex(); // using an open index instead to keep the _textureDictionary length low
+		renderTexture._storeID = this._releaseStoreID(); // using an open index instead to keep the _textureDictionary length low
 		this._textureDictionary[renderTexture._storeID] = renderTexture;
 
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -11270,15 +11292,29 @@ createjs.deprecate = function(fallbackMethod, name) {
 	};
 
 	/**
-	 * Get the next open slot to assign a texture in the _textureDictionary array
-	 * @method _getTexDictOpenIndex
-	 * @return {Number} The lowest index of undefined value or the length of the array
+	 * Get an open slot to assign a texture in the _textureDictionary array
+	 * @method _releaseStoreID
+	 * @return {Number} index of undefined value or the length of the array
 	 * @protected
 	 */
-	p._getTexDictOpenIndex = function () {
-		var index = this._textureDictionary.findIndex(i=>i==undefined);
-		if(index < 0) index = this._textureDictionary.length;
-		return index;
+	p._releaseStoreID = function () {
+//		var index = this._textureDictionary.findIndex(i=>i==undefined);
+		// if(index < 0) index = ;
+		// return index;
+		return this._storeIDPool.pop() || this._textureDictionary.length;
+	};
+
+	/**
+	 * Scrubs through textureDictionary and returns arrays of storeIDs of undefined value and assigns this._storeIDPool to it
+	 * @method _cleanupStoreIDPool
+	 * @return {Array} same as this._storeIDPool
+	 * @protected
+	 */
+	p._cleanupStoreIDPool = function () {
+		return this._storeIDPool = this._textureDictionary.reduce((acc, cur, index) => {
+			if(cur == undefined) acc.push(index)
+			return acc;
+		}, []);
 	};
 
 	/**
@@ -11307,7 +11343,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 		var storeID = this._textureIDs[srcPath];
 		if (storeID === undefined) {
 			// this._textureIDs[srcPath] = storeID = this._textureDictionary.length;
-			this._textureIDs[srcPath] = storeID = this._getTexDictOpenIndex();
+			this._textureIDs[srcPath] = storeID = this._releaseStoreID();
 			image._storeID = storeID;
 			image._invalid = true;
 			texture = this._getSafeTexture();
@@ -11451,7 +11487,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @method _killTextureObject
 	 * @param {WebGLTexture} texture The texture to be cleaned out
 	 * @protected
-	 * @returns {Boolean} false if no texture otherwise always true
+	 * @return {Boolean} false if no texture otherwise always true
 	 */
 	p._killTextureObject = function (texture) {
 		if (!texture) { return false; }
@@ -11459,7 +11495,9 @@ createjs.deprecate = function(fallbackMethod, name) {
 
 		// remove linkage
 		if (texture._storeID !== undefined && texture._storeID >= 0) {
+			if(!this._storeIDPool.includes(texture._storeID)) this._storeIDPool.unshift(texture._storeID);
 			this._textureDictionary[texture._storeID] = undefined;
+
 			for (var n in this._textureIDs) {
 				if (this._textureIDs[n] === texture._storeID) { delete this._textureIDs[n]; }
 			}
@@ -11634,7 +11672,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * Returns a matrix that can be used to counter position the `target` so that it fits and scales to the `manager`
 	 * @param {DisplayObject} target The object to be counter positioned
 	 * @param {BitmapCache} manager The cache manager to be aligned to
-	 * @returns {Matrix2D} The matrix that can be used used to counter position the container
+	 * @return {Matrix2D} The matrix that can be used used to counter position the container
 	 * @method _alignTargetToCache
 	 * @private
 	 */
@@ -18135,7 +18173,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:28 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Wed, 21 Jan 2026 00:05:06 GMT"; // injected by build process
 
 })();
 
@@ -18166,7 +18204,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type {String}
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:27 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Wed, 21 Jan 2026 00:05:05 GMT"; // injected by build process
 
 })();
 
@@ -25479,7 +25517,7 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:27 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Wed, 21 Jan 2026 00:05:05 GMT"; // injected by build process
 
 })();
 
@@ -33081,6 +33119,6 @@ createjs.deprecate = function(fallbackMethod, name) {
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*=date*/"Tue, 20 Jan 2026 20:59:27 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Wed, 21 Jan 2026 00:05:05 GMT"; // injected by build process
 
 })();
